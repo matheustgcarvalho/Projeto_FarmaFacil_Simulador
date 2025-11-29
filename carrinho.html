@@ -8,93 +8,151 @@
     <style>
        :root { --tech-purple: #2E1A47; --neon-mint: #69FFC2; --pure-white: #FFFFFF; --warning-red: #ff4757; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
-        body { background-color: var(--tech-purple); color: var(--pure-white); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        header { background-color: rgba(46, 26, 71, 0.95); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--neon-mint); flex-shrink: 0; gap: 20px; }
-        .user-name-display { font-size: 1.1rem; font-weight: 700; color: var(--neon-mint); }
-        .btn-exit-header { background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 600; transition: color 0.3s;}
+        /* Fonte base reduzida para caber no tablet */
+        body { 
+            background-color: var(--tech-purple); 
+            color: var(--pure-white); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            font-size: 13px; 
+        }
+        
+        /* HEADER COMPACTO */
+        header { 
+            background-color: rgba(46, 26, 71, 0.95); 
+            padding: 10px 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid var(--neon-mint); 
+            flex-shrink: 0; 
+            gap: 10px; 
+        }
+        .user-name-display { font-size: 0.9rem; font-weight: 700; color: var(--neon-mint); }
+        
+        .btn-exit-header { background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 600; font-size: 0.8rem; }
         .btn-exit-header:hover { color: var(--warning-red); }
-        .btn-back-shop { text-decoration: none; color: var(--neon-mint); display: flex; align-items: center; gap: 5px; font-weight: 700; border: 2px solid var(--neon-mint); padding: 8px 15px; border-radius: 30px; transition: all 0.3s;}
-        .btn-back-shop:hover { background-color: var(--neon-mint); color: var(--tech-purple); }
 
-        main { flex-grow: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; max-width: 800px; margin: 0 auto; width: 100%; }
+        .btn-back-shop { 
+            text-decoration: none; color: var(--neon-mint); display: flex; align-items: center; gap: 5px; font-weight: 700; 
+            border: 1px solid var(--neon-mint); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; 
+        }
+
+        /* CONTEÚDO PRINCIPAL */
+        main { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; width: 100%; }
         
-        /* HEADER DA LISTA DE ITENS */
-        .cart-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .page-title { font-size: 1.8rem; display: flex; align-items: center; gap: 10px; color: var(--neon-mint); margin: 0; }
+        .cart-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .page-title { font-size: 1.3rem; display: flex; align-items: center; gap: 8px; color: var(--neon-mint); margin: 0; }
         
-        /* BOTÃO LIMPAR CARRINHO */
-        .btn-clear-cart { background: none; border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); padding: 8px 15px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.9rem; transition: all 0.3s; }
+        .btn-clear-cart { 
+            background: none; border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); 
+            padding: 5px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; transition: all 0.3s;
+        }
         .btn-clear-cart:hover { border-color: var(--warning-red); color: var(--warning-red); background-color: rgba(255, 71, 87, 0.1); }
 
-        .cart-list-container { display: flex; flex-direction: column; gap: 15px; }
-        .cart-item { background-color: rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(105, 255, 194, 0.2); }
+        .cart-list-container { display: flex; flex-direction: column; gap: 10px; }
         
-        .cart-item-left { display: flex; align-items: center; gap: 15px; }
+        /* CARD DE ITEM REDUZIDO */
+        .cart-item { 
+            background-color: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; 
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(105, 255, 194, 0.2); 
+        }
         
-        /* ESTILO DA IMAGEM NO CARRINHO */
+        .cart-item-left { display: flex; align-items: center; gap: 10px; }
         .cart-item-img {
-            width: 70px;
-            height: 70px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background-color: white; /* Fallback */
+            width: 50px; height: 50px; /* Imagem menor */
+            object-fit: cover; border-radius: 6px; background-color: white;
         }
 
-        .item-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 5px;}
-        .item-price-unit { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
-        .item-price-total { color: var(--neon-mint); font-weight: 700; font-size: 1rem; margin-top: 2px;}
+        .item-name { font-size: 0.95rem; font-weight: 700; margin-bottom: 2px; line-height: 1.1;}
+        .item-price-unit { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+        .item-price-total { color: var(--neon-mint); font-weight: 700; font-size: 0.9rem; margin-top: 2px;}
 
-        /* CONTROLES DE QUANTIDADE (+ e -) */
+        /* CONTROLES MENORES */
         .quantity-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background-color: rgba(0,0,0,0.2);
-            padding: 5px;
-            border-radius: 30px;
+            display: flex; align-items: center; gap: 8px;
+            background-color: rgba(0,0,0,0.2); padding: 4px; border-radius: 20px;
         }
         .btn-qty {
-            width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s;
+            width: 24px; height: 24px; border-radius: 50%; border: none; cursor: pointer; 
+            display: flex; justify-content: center; align-items: center; 
         }
         .btn-decrease { background-color: transparent; border: 1px solid var(--warning-red); color: var(--warning-red); }
-        .btn-decrease:hover { background-color: var(--warning-red); color: white; }
-        
-        .qty-display { font-weight: 700; font-size: 1.1rem; min-width: 25px; text-align: center; }
-
+        .qty-display { font-weight: 700; font-size: 0.9rem; min-width: 20px; text-align: center; }
         .btn-increase { background-color: var(--neon-mint); color: var(--tech-purple); }
-        .btn-increase:hover { transform: scale(1.1); box-shadow: 0 0 8px var(--neon-mint); }
 
+        .empty-cart-message { text-align: center; padding: 30px; color: rgba(255,255,255,0.5); font-size: 1rem; }
 
-        .empty-cart-message { text-align: center; padding: 50px; color: rgba(255,255,255,0.5); font-size: 1.2rem; }
+        /* FOOTER COMPACTO */
+        footer { 
+            background-color: rgba(46, 26, 71, 0.98); padding: 10px 15px; 
+            border-top: 1px solid rgba(105, 255, 194, 0.3); flex-shrink: 0; 
+        }
+        .cart-total-summary { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 1rem; }
+        .total-value { color: var(--neon-mint); font-size: 1.4rem; font-weight: 800; }
+        .btn-finish-order { 
+            width: 100%; background-color: var(--neon-mint); color: var(--tech-purple); 
+            padding: 10px; border-radius: 10px; font-weight: 800; border: none; 
+            font-size: 1rem; cursor: pointer; display: flex; justify-content: center; alignItems: center; gap: 8px;
+        }
 
-        footer { background-color: rgba(46, 26, 71, 0.98); padding: 20px 30px; border-top: 1px solid rgba(105, 255, 194, 0.3); flex-shrink: 0; }
-        .cart-total-summary { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 1.4rem; }
-        .total-value { color: var(--neon-mint); font-size: 1.8rem; font-weight: 800; }
-        .btn-finish-order { width: 100%; background-color: var(--neon-mint); color: var(--tech-purple); padding: 15px; border-radius: 12px; font-weight: 800; border: none; font-size: 1.2rem; cursor: pointer; display: flex; justify-content: center; alignItems: center; gap: 10px;}
+        /* --- ESTILOS DO MODAL DE CONFIRMAÇÃO --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(3px);
+            z-index: 1000;
+            display: none; /* Escondido por padrão */
+            justify-content: center; align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #2a1b3d;
+            border: 1px solid var(--neon-mint);
+            border-radius: 15px;
+            padding: 20px;
+            width: 85%;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            animation: modalPop 0.3s ease-out;
+        }
+        @keyframes modalPop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .modal-icon { font-size: 3rem; color: var(--warning-red); margin-bottom: 10px; }
+        .modal-title { font-size: 1.1rem; font-weight: 800; color: white; margin-bottom: 5px; }
+        .modal-text { font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 20px; }
+        
+        .modal-actions { display: flex; gap: 10px; }
+        .modal-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; font-size: 0.9rem;}
+        .btn-modal-cancel { background-color: rgba(255,255,255,0.1); color: white; }
+        .btn-modal-confirm { background-color: var(--warning-red); color: white; }
+
     </style>
 </head>
 <body>
 
     <header>
         <a href="loja.html" class="btn-back-shop">
-            <span class="material-icons">arrow_back</span> Voltar à Loja
+            <span class="material-icons" style="font-size: 1rem;">arrow_back</span> Loja
         </a>
         <div style="text-align: center;">
-             <span class="welcome-text">Carrinho de</span><br>
+             <span class="welcome-text" style="font-size: 0.7rem; opacity: 0.7;">Carrinho de</span><br>
              <span id="userNameDisplay" class="user-name-display">...</span>
         </div>
         <button id="btnExit" class="btn-exit-header">
-            <span class="material-icons">logout</span> Sair
+            <span class="material-icons" style="font-size: 1.1rem;">logout</span>
         </button>
     </header>
 
     <main>
         <div class="cart-header-row">
-            <h1 class="page-title"><span class="material-icons" style="font-size: 2rem;">shopping_cart_checkout</span> Seu Carrinho</h1>
+            <h1 class="page-title"><span class="material-icons" style="font-size: 1.5rem;">shopping_cart</span> Carrinho</h1>
             <button id="btnClearCart" class="btn-clear-cart">
-                <span class="material-icons">delete_sweep</span> Limpar Carrinho
+                <span class="material-icons" style="font-size: 1rem;">delete_sweep</span> Limpar
             </button>
         </div>
         
@@ -104,7 +162,7 @@
 
     <footer>
         <div class="cart-total-summary">
-            <span>Total a pagar:</span>
+            <span>Total:</span>
             <span id="totalValueDisplay" class="total-value">R$ 0,00</span>
         </div>
         <button class="btn-finish-order">
@@ -112,12 +170,24 @@
         </button>
     </footer>
 
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="material-icons modal-icon">warning_amber</div>
+            <div class="modal-title">Esvaziar Carrinho?</div>
+            <div class="modal-text">Todos os itens serão removidos. Essa ação não pode ser desfeita.</div>
+            <div class="modal-actions">
+                <button id="btnCancelClear" class="modal-btn btn-modal-cancel">Cancelar</button>
+                <button id="btnConfirmClear" class="modal-btn btn-modal-confirm">Sim, Esvaziar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Login Check
             const nomeSalvo = sessionStorage.getItem('usuarioFarmaFacil');
             if (!nomeSalvo) { window.location.href = 'login.html'; return; }
-            document.getElementById('userNameDisplay').textContent = nomeSalvo;
+            document.getElementById('userNameDisplay').textContent = nomeSalvo.split(' ')[0]; // Só primeiro nome
             
             document.getElementById('btnExit').addEventListener('click', function() {
                 sessionStorage.removeItem('usuarioFarmaFacil'); window.location.href = 'login.html';
@@ -129,13 +199,40 @@
             const cartListContainer = document.getElementById('cartListContainer');
             const totalValueDisplay = document.getElementById('totalValueDisplay');
             const btnClearCart = document.getElementById('btnClearCart');
+            
+            // Elementos do Modal
+            const confirmModal = document.getElementById('confirmModal');
+            const btnCancelClear = document.getElementById('btnCancelClear');
+            const btnConfirmClear = document.getElementById('btnConfirmClear');
 
-            // --- FUNÇÃO LIMPAR CARRINHO ---
+            // --- LÓGICA DO MODAL ---
+            // 1. Abrir Modal
             btnClearCart.addEventListener('click', function() {
-                if(confirm("Tem certeza que deseja esvaziar todo o carrinho?")) {
-                    carrinhoBruto = [];
-                    salvarERenderizar();
+                if(carrinhoBruto.length > 0) {
+                    confirmModal.style.display = 'flex';
                 }
+            });
+
+            // 2. Fechar Modal (Cancelar)
+            btnCancelClear.addEventListener('click', function() {
+                confirmModal.style.display = 'none';
+            });
+
+            // 3. Confirmar Limpeza
+            btnConfirmClear.addEventListener('click', function() {
+                carrinhoBruto = [];
+                salvarERenderizar();
+                confirmModal.style.display = 'none';
+            });
+
+            // Lógica do Botão FINALIZAR
+            const btnFinish = document.querySelector('.btn-finish-order');
+            btnFinish.addEventListener('click', function() {
+                if (carrinhoBruto.length === 0) {
+                    alert("Carrinho vazio!");
+                    return;
+                }
+                window.location.href = 'metodopagamento.html';
             });
 
             function salvarERenderizar() {
@@ -159,16 +256,14 @@
                 cartListContainer.innerHTML = ''; 
                 let totalGeral = 0;
 
-                // --- LÓGICA DE VISIBILIDADE DO BOTÃO LIMPAR ---
                 if (carrinhoBruto.length === 0) {
-                    btnClearCart.style.display = 'none'; // ESCONDE SE VAZIO
-                    cartListContainer.innerHTML = '<div class="empty-cart-message"><span class="material-icons" style="font-size: 4rem; margin-bottom: 20px; display: block;">remove_shopping_cart</span>Seu carrinho está vazio.</div>';
+                    btnClearCart.style.display = 'none';
+                    cartListContainer.innerHTML = '<div class="empty-cart-message"><span class="material-icons" style="font-size: 3rem; margin-bottom: 10px; display: block;">remove_shopping_cart</span>Vazio</div>';
                     totalValueDisplay.textContent = 'R$ 0,00';
                     return;
                 } else {
-                    btnClearCart.style.display = 'flex'; // MOSTRA SE TEM ITENS
+                    btnClearCart.style.display = 'flex';
                 }
-                // ----------------------------------------------
 
                 const itensAgrupados = agruparItens(carrinhoBruto);
 
@@ -179,27 +274,23 @@
                     const itemElement = document.createElement('div');
                     itemElement.classList.add('cart-item');
                     
-                    // HTML COM IMAGEM E CONTROLES DE + E -
                     itemElement.innerHTML = `
                         <div class="cart-item-left">
-                            <img src="${produto.imagem}" class="cart-item-img" alt="${produto.nome}">
-                            
+                            <img src="${produto.imagem}" class="cart-item-img" alt="Foto">
                             <div>
                                 <div class="item-name">${produto.nome}</div>
                                 <div class="item-price-unit">Unit: R$ ${produto.preco.toFixed(2).replace('.',',')}</div>
-                                <div class="item-price-total">Total: R$ ${precoTotalItem.toFixed(2).replace('.',',')}</div>
+                                <div class="item-price-total">R$ ${precoTotalItem.toFixed(2).replace('.',',')}</div>
                             </div>
                         </div>
 
                         <div class="quantity-controls">
-                            <button class="btn-qty btn-decrease" data-id="${produto.id}" title="Diminuir">
-                                <span class="material-icons" style="font-size: 1.2rem;">remove</span>
+                            <button class="btn-qty btn-decrease" data-id="${produto.id}">
+                                <span class="material-icons" style="font-size: 1rem;">remove</span>
                             </button>
-                            
                             <span class="qty-display">${produto.quantidade}</span>
-                            
-                            <button class="btn-qty btn-increase" data-id="${produto.id}" title="Aumentar">
-                                <span class="material-icons" style="font-size: 1.2rem;">add</span>
+                            <button class="btn-qty btn-increase" data-id="${produto.id}">
+                                <span class="material-icons" style="font-size: 1rem;">add</span>
                             </button>
                         </div>
                     `;
@@ -207,12 +298,10 @@
                 });
 
                 totalValueDisplay.textContent = 'R$ ' + totalGeral.toFixed(2).replace('.',',');
-
                 atribuirBotoes();
             }
 
             function atribuirBotoes() {
-                // Lógica Diminuir (-)
                 document.querySelectorAll('.btn-decrease').forEach(button => {
                     button.addEventListener('click', function() {
                         const id = this.getAttribute('data-id');
@@ -224,11 +313,9 @@
                     });
                 });
 
-                // Lógica Aumentar (+)
                 document.querySelectorAll('.btn-increase').forEach(button => {
                     button.addEventListener('click', function() {
                         const id = this.getAttribute('data-id');
-                        // Encontra um exemplo desse item para copiar os dados
                         const itemExemplo = carrinhoBruto.find(item => item.id === id);
                         if (itemExemplo) {
                             carrinhoBruto.push(itemExemplo);
@@ -237,20 +324,6 @@
                     });
                 });
             }
-
-            const btnFinish = document.querySelector('.btn-finish-order');
-            
-            btnFinish.addEventListener('click', function() {
-                if (carrinhoBruto.length === 0) {
-                    alert("Seu carrinho está vazio!");
-                    return;
-                }
-                
-                // Salva o total calculado para usar na próxima tela (opcional, mas útil)
-                // O carrinho já está no storage, então podemos recalcular lá também.
-                // Apenas redireciona:
-                window.location.href = 'metodopagamento.html';
-            });
 
             renderizarCarrinho();
         });

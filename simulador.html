@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador FarmaFácil</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root { --tech-purple: #2E1A47; --neon-mint: #69FFC2; --pure-white: #FFFFFF; --dark-metal: #1a1a2e; --tablet-bezel: #111; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #0d0d16; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; padding: 10px; }
+
+        .machine-structure {
+            width: 100%; max-width: 1100px; height: 98vh;
+            background-color: var(--tech-purple); border-radius: 20px; border: 6px solid #4a3b69;
+            box-shadow: 0 0 100px rgba(105, 255, 194, 0.15); display: flex; flex-direction: column; overflow: hidden;
+        }
+        .machine-header-banner {
+            background: linear-gradient(90deg, #221236, #3a2258); padding: 10px;
+            text-align: center; color: var(--pure-white); font-weight: 800; font-size: 1.5rem; letter-spacing: 2px;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            border-bottom: 4px solid #4a3b69; text-shadow: 0 0 10px var(--neon-mint);
+        }
+        .machine-main-body { flex-grow: 1; display: flex; overflow: hidden; }
+
+        /* ESQUERDA */
+        .left-window-section {
+            flex: 50%; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+            border-right: 6px solid #4a3b69; position: relative; overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.5); display: flex; flex-direction: column;
+        }
+        .shelf-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); width: 100%; height: 75%; padding: 10px; gap: 5px; }
+        .shelf-slot { border-bottom: 2px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5px; position: relative; }
+        .slot-img { max-width: 70%; max-height: 40px; object-fit: contain; filter: brightness(0.9); }
+        .slot-label { font-size: 0.5rem; background: rgba(0,0,0,0.5); color: white; padding: 2px; border-radius: 3px; }
+        .slot-coil { position: absolute; bottom: 15px; width: 25px; height: 25px; border: 2px solid rgba(255,255,255,0.1); border-radius: 50%; z-index: -1; }
+        
+        .blinking { animation: blinkSlot 0.5s infinite; }
+        @keyframes blinkSlot { 0%,100% { background: transparent; } 50% { background: rgba(105,255,194,0.3); } }
+
+        /* DIREITA */
+        .right-interface-section {
+            flex: 50%; background-color: #2a1b3d; padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: inset 10px 0 30px rgba(0,0,0,0.4);
+        }
+        .tablet-frame {
+            width: 450px; height: 100%; max-height: 800px;
+            background-color: var(--tablet-bezel); border-radius: 20px;
+            padding: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            border: 3px solid #000; display: flex; flex-direction: column;
+        }
+        .tablet-screen-iframe-container { background-color: #fff; flex-grow: 1; border-radius: 8px; overflow: hidden; position: relative; }
+        iframe { width: 100%; height: 100%; border: none; display: block; }
+        
+        /* BANDEJA */
+        .dispense-tray {
+            height: 120px; background: linear-gradient(0deg, #111, #222);
+            border-top: 6px solid #333; position: relative;
+            display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px;
+            overflow: visible; z-index: 20;
+        }
+        .tray-glass {
+            position: absolute; top: -10px; width: 94%; left: 3%; height: 40px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+            border-bottom: 1px solid rgba(255,255,255,0.2); border-radius: 0 0 10px 10px; pointer-events: none;
+        }
+
+        /* ANIMAÇÃO */
+        .falling-box-container {
+            position: absolute; width: 80px; height: 80px; z-index: 50;
+            left: 50%; transform: translateX(-50%); top: -100px;
+            background-color: white; border-radius: 8px; padding: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;
+        }
+        .falling-box-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        @keyframes dropPhysics {
+            0% { top: -100px; transform: translateX(-50%) rotate(0deg); }
+            60% { top: 88%; transform: translateX(-50%) rotate(10deg); }
+            75% { top: 80%; transform: translateX(-50%) rotate(-5deg); }
+            90% { top: 88%; transform: translateX(-50%) rotate(2deg); }
+            100% { top: 86%; transform: translateX(-50%) rotate(var(--final-rot)); }
+        }
+        .anim-drop { animation: dropPhysics 1s ease-in forwards; }
+
+        .btn-finish {
+            background: var(--neon-mint); color: var(--tech-purple);
+            padding: 12px 30px; border-radius: 30px; font-weight: 800; border: none;
+            box-shadow: 0 0 20px var(--neon-mint); cursor: pointer;
+            opacity: 0; pointer-events: none; transition: opacity 0.5s; transform: translateY(-10px);
+        }
+        .btn-finish.show { opacity: 1; pointer-events: all; }
+
+        .machine-status-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 99;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+            color: var(--neon-mint); font-family: monospace; font-size: 1.5rem; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="machine-structure">
+        <div class="machine-header-banner">
+            <span class="material-icons">local_pharmacy</span> FarmaFácil
+        </div>
+
+        <div class="machine-main-body">
+            <div class="left-window-section" id="machineWindow">
+                <div class="shelf-grid" id="shelfGrid"></div>
+            </div>
+
+            <div class="right-interface-section">
+                <div class="tablet-frame">
+                    <div class="tablet-screen-iframe-container">
+                        <div id="machineOverlay" class="machine-status-overlay">
+                            <div class="spinner" style="border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--neon-mint); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s infinite; margin-bottom: 15px;"></div>
+                            <div id="statusText" class="status-text">PROCESSANDO</div>
+                            <div id="statusSub" class="status-sub">Aguarde...</div>
+                        </div>
+                        <style>@keyframes spin{to{transform: rotate(360deg);}}</style>
+                        <iframe src="login.html" id="systemFrame"></iframe>
+                    </div>
+                    <div style="width: 100%; display:flex; justify-content:center; margin-top:8px;"><div style="width:40px; height:4px; background:#333; border-radius:2px;"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dispense-tray">
+            <div class="tray-glass"></div>
+            <button id="btnFinish" class="btn-finish">PEGAR TUDO <span class="material-icons">arrow_downward</span></button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const shelfGrid = document.getElementById('shelfGrid');
+            const machineWindow = document.getElementById('machineWindow');
+            const btnFinish = document.getElementById('btnFinish');
+            const iframe = document.getElementById('systemFrame');
+            const machineOverlay = document.getElementById('machineOverlay');
+            const statusText = document.getElementById('statusText');
+            const statusSub = document.getElementById('statusSub');
+
+            // ESTOQUE VISUAL SINCRONIZADO
+            const stockProducts = [
+                "Dorflex", "Neosaldina", "Torsilax", "Advil", 
+                "Paracetamol", "Benegrip", "Cimegripe", "Vick",
+                "Vitamina C", "Allegra", "Polaramine", "Eno",
+                "Buscopan", "Omeprazol", "Luftal", "Amox"
+            ];
+            
+            stockProducts.forEach((name, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'shelf-slot'; slot.id = `slot-${index}`;
+                slot.innerHTML = `
+                    <div class="slot-coil"></div>
+                    <img src="https://placehold.co/50x50/444/999?text=${name.substring(0,3)}" class="slot-img">
+                    <div class="slot-label">${name}</div>
+                `;
+                shelfGrid.appendChild(slot);
+            });
+
+            // OUVINTE
+            window.addEventListener('message', function(event) {
+                if (event.data.action === 'DISPENSAR_PRODUTOS') {
+                    machineOverlay.style.display = 'flex';
+                    iniciarDispensacao(event.data.carrinho);
+                }
+            });
+
+            async function iniciarDispensacao(carrinhoRecebido) {
+                await new Promise(r => setTimeout(r, 1000));
+                for (const item of carrinhoRecebido) {
+                    await derrubarProduto(item);
+                }
+                btnFinish.classList.add('show');
+                
+                statusText.textContent = "PRONTO!";
+                statusSub.textContent = "Retire abaixo.";
+                
+                setTimeout(() => { machineOverlay.style.display = 'none'; statusText.textContent = "PROCESSANDO"; statusSub.textContent = "Aguarde..."; }, 4000);
+            }
+
+            async function derrubarProduto(item) {
+                let targetSlotIndex = stockProducts.findIndex(p => item.nome.includes(p));
+                if (targetSlotIndex === -1) targetSlotIndex = Math.floor(Math.random() * 16);
+                
+                const targetSlot = document.getElementById(`slot-${targetSlotIndex}`);
+                
+                // Pisca
+                targetSlot.classList.add('blinking');
+                await new Promise(r => setTimeout(r, 2000));
+                targetSlot.classList.remove('blinking');
+
+                // Cai
+                const dropBox = document.createElement('div');
+                dropBox.className = 'falling-box-container anim-drop';
+                const dropImg = document.createElement('img');
+                dropImg.src = item.imagem;
+                dropBox.appendChild(dropImg);
+                dropBox.style.setProperty('--final-rot', `${Math.floor(Math.random() * 40) - 20}deg`);
+                
+                machineWindow.appendChild(dropBox);
+                await new Promise(r => setTimeout(r, 1000));
+            }
+
+            btnFinish.addEventListener('click', function() {
+                const drops = document.querySelectorAll('.falling-box-container');
+                drops.forEach(d => d.remove());
+                btnFinish.classList.remove('show');
+                iframe.src = 'login.html'; // Reset total
+                sessionStorage.clear();
+            });
+        });
+    </script>
+
+</body>
+</html>

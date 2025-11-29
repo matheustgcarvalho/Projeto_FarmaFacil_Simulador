@@ -6,54 +6,51 @@
     <title>FarmaFácil - Pagamento</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        /* --- Variáveis Globais --- */
        :root { --tech-purple: #2E1A47; --neon-mint: #69FFC2; --pure-white: #FFFFFF; --warning-red: #ff4757; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
-        body { background-color: var(--tech-purple); color: var(--pure-white); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Header Simplificado */
-        header { background-color: rgba(46, 26, 71, 0.95); padding: 15px 25px; display: flex; align-items: center; border-bottom: 2px solid var(--neon-mint); flex-shrink: 0; gap: 20px; }
-        .btn-back { text-decoration: none; color: var(--neon-mint); display: flex; align-items: center; gap: 5px; font-weight: 700; border: 2px solid var(--neon-mint); padding: 8px 15px; border-radius: 30px; transition: all 0.3s;}
+        /* Ajuste de escala */
+        body { background-color: var(--tech-purple); color: var(--pure-white); height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 13px; }
+        
+        header { background-color: rgba(46, 26, 71, 0.95); padding: 10px 15px; display: flex; align-items: center; border-bottom: 1px solid var(--neon-mint); flex-shrink: 0; gap: 10px; }
+        .btn-back { text-decoration: none; color: var(--neon-mint); display: flex; align-items: center; gap: 5px; font-weight: 700; border: 1px solid var(--neon-mint); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; transition: all 0.3s;}
         .btn-back:hover { background-color: var(--neon-mint); color: var(--tech-purple); }
-        .header-title { font-size: 1.2rem; font-weight: 700; margin-left: auto; margin-right: auto; }
+        .header-title { font-size: 1rem; font-weight: 700; margin-left: auto; margin-right: auto; }
 
-        main { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; max-width: 900px; margin: 0 auto; width: 100%; }
+        main { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; width: 100%; }
 
-        /* Resumo do Valor */
-        .payment-summary { text-align: center; margin-bottom: 40px; }
-        .payment-label { font-size: 1.2rem; color: rgba(255,255,255,0.7); margin-bottom: 5px; }
-        .payment-value { font-size: 3.5rem; font-weight: 800; color: var(--neon-mint); text-shadow: 0 0 20px rgba(105, 255, 194, 0.3); }
+        /* Resumo menor */
+        .payment-summary { text-align: center; margin-bottom: 20px; background-color: rgba(0,0,0,0.2); width: 100%; padding: 10px; border-radius: 10px;}
+        .payment-label { font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 2px; }
+        .payment-value { font-size: 1.8rem; font-weight: 800; color: var(--neon-mint); }
 
-        /* Grid de Opções */
-        .methods-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; width: 100%; margin-bottom: 30px; }
+        /* Lista de Métodos em 1 coluna */
+        .methods-grid { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-bottom: 15px; }
         
         .method-card {
             background-color: rgba(255,255,255,0.05);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 12px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
             gap: 15px;
             cursor: pointer;
             transition: all 0.3s;
         }
-        .method-card:hover { background-color: rgba(255,255,255,0.1); transform: translateY(-5px); }
-        .method-card.active { border-color: var(--neon-mint); background-color: rgba(105, 255, 194, 0.1); box-shadow: 0 0 20px rgba(105, 255, 194, 0.2); }
+        .method-card:hover, .method-card.active { border-color: var(--neon-mint); background-color: rgba(105, 255, 194, 0.1); }
         
-        .method-icon { font-size: 3rem; color: var(--pure-white); }
-        .method-name { font-weight: 700; font-size: 1.1rem; }
+        .method-icon { font-size: 1.8rem; color: var(--pure-white); }
+        .method-name { font-weight: 700; font-size: 1rem; }
 
-        /* Área de Conteúdo Dinâmico (Instruções/QR Code) */
+        /* Área Dinâmica Compacta */
         .dynamic-content {
             width: 100%;
             background-color: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            padding: 30px;
+            border-radius: 12px;
+            padding: 20px;
             text-align: center;
-            min-height: 250px;
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -61,42 +58,33 @@
             border: 1px dashed rgba(255,255,255,0.2);
         }
 
-        /* Estilos Específicos das Telas de Pagamento */
-        .instruction-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; color: var(--pure-white); }
-        .instruction-text { font-size: 1.1rem; color: rgba(255,255,255,0.7); margin-bottom: 25px; max-width: 400px; }
-        
-        /* Animação Cartão */
-        .card-animation { font-size: 5rem; color: var(--neon-mint); animation: pulse 2s infinite; margin-bottom: 20px; }
+        .instruction-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; color: var(--pure-white); }
+        .instruction-text { font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 15px; }
+        .card-animation { font-size: 3.5rem; color: var(--neon-mint); animation: pulse 2s infinite; margin-bottom: 10px; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
 
-        /* QR Code Pix */
-        .pix-container { display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        .qr-image { width: 200px; height: 200px; border-radius: 10px; border: 4px solid white; }
-        .pix-code-box { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 8px; font-family: monospace; color: var(--neon-mint); max-width: 300px; word-break: break-all; font-size: 0.8rem; }
-
-        /* Tela de Sucesso */
-        .success-screen { display: none; flex-direction: column; align-items: center; animation: fadeIn 0.5s; }
-        .success-icon { font-size: 6rem; color: var(--neon-mint); margin-bottom: 20px; }
+        .pix-container { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .qr-image { width: 130px; height: 130px; border-radius: 8px; border: 3px solid white; }
+        
+        .success-screen { display: none; flex-direction: column; align-items: center; animation: fadeIn 0.5s; height: 100%; justify-content: center;}
+        .success-icon { font-size: 4rem; color: var(--neon-mint); margin-bottom: 10px; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Loading Spinner */
-        .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--neon-mint); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        .spinner { border: 3px solid rgba(255,255,255,0.1); border-left-color: var(--neon-mint); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
     </style>
 </head>
 <body>
 
     <header>
-        <a href="carrinho.html" class="btn-back">
-            <span class="material-icons">arrow_back</span> Voltar
-        </a>
-        <div class="header-title">Finalizar Pagamento</div>
-        <div style="width: 80px;"></div> </header>
+        <a href="carrinho.html" class="btn-back"><span class="material-icons" style="font-size:1rem;">arrow_back</span> Voltar</a>
+        <div class="header-title">Pagamento</div>
+        <div style="width: 60px;"></div>
+    </header>
 
     <main>
         <div class="payment-summary">
-            <div class="payment-label">Total a Pagar</div>
+            <div class="payment-label">Total</div>
             <div id="totalDisplay" class="payment-value">R$ 0,00</div>
         </div>
 
@@ -117,116 +105,76 @@
 
         <div id="dynamicContent" class="dynamic-content">
             <span class="material-icons" style="font-size: 3rem; color: rgba(255,255,255,0.2);">touch_app</span>
-            <p style="color: rgba(255,255,255,0.5); margin-top: 10px;">Selecione uma forma de pagamento acima.</p>
+            <p style="color: rgba(255,255,255,0.5); margin-top: 10px; font-size: 0.9rem;">Selecione uma forma de pagamento.</p>
         </div>
-
     </main>
 
     <script>
+        let carrinho = [];
+
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. Recuperar valor total do carrinho
-            let carrinho = JSON.parse(sessionStorage.getItem('carrinhoFarmaFacil')) || [];
+            carrinho = JSON.parse(sessionStorage.getItem('carrinhoFarmaFacil')) || [];
             let total = 0;
             carrinho.forEach(item => total += item.preco);
-            
-            // Exibir valor formatado
             document.getElementById('totalDisplay').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
-
-            // Se carrinho estiver vazio (acesso direto pela URL), alerta e volta
-            if(carrinho.length === 0 && total === 0) {
-                alert("Seu carrinho está vazio ou ocorreu um erro.");
-                window.location.href = 'loja.html';
-            }
         });
 
-        // Função principal de troca de telas
         function selectMethod(method) {
             const container = document.getElementById('dynamicContent');
             const cards = document.querySelectorAll('.method-card');
-            
-            // Atualiza estilo dos botões (active)
             cards.forEach(card => card.classList.remove('active'));
             event.currentTarget.classList.add('active');
 
-            if (method === 'credit' || method === 'debit') {
-                showCardMachineScreen(container, method);
-            } else if (method === 'pix') {
-                showPixScreen(container);
-            }
+            if (method === 'credit') showCardMachineScreen(container, 'Crédito');
+            else if (method === 'debit') showCardMachineScreen(container, 'Débito');
+            else if (method === 'pix') showPixScreen(container);
         }
 
-        // TELA 1: Maquininha de Cartão
         function showCardMachineScreen(container, type) {
-            const typeName = type === 'credit' ? 'Crédito' : 'Débito';
-            
             container.innerHTML = `
-                <div class="instruction-title">Pagamento no ${typeName}</div>
+                <div class="instruction-title">Use a Maquininha (${type})</div>
                 <span class="material-icons card-animation">point_of_sale</span>
-                <p class="instruction-text">
-                    A maquininha ao lado foi ativada.<br>
-                    <strong>Insira ou aproxime seu cartão agora.</strong>
-                </p>
+                <p class="instruction-text">Insira ou aproxime o cartão.</p>
                 <div class="spinner"></div>
-                <p style="font-size: 0.9rem; opacity: 0.7;">Aguardando processamento...</p>
+                <p style="font-size: 0.8rem; opacity: 0.7;">Aguardando...</p>
             `;
-
-            // SIMULAÇÃO: Aprova pagamento automaticamente após 5 segundos
-            setTimeout(() => {
-                showSuccess(container);
-            }, 5000);
+            setTimeout(() => showSuccess(container), 4000);
         }
 
-        // TELA 2: PIX
         function showPixScreen(container) {
-            // Gera um QR Code falso usando API
-            const qrValue = "00020126360014BR.GOV.BCB.PIX0114+558599999999520400005303986540510.005802BR5910FarmaFacil6009Fortaleza62070503***6304ABCD";
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrValue}`;
-
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=FarmaFacilPixTest`;
             container.innerHTML = `
                 <div class="instruction-title">Pagamento via PIX</div>
                 <div class="pix-container">
-                    <img src="${qrUrl}" class="qr-image" alt="QR Code Pix">
-                    <p class="instruction-text" style="margin-bottom: 10px;">Escaneie o QR Code com o app do seu banco.</p>
-                    
-                    <button onclick="simularPagamentoPix()" style="background-color: var(--neon-mint); border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; color: var(--tech-purple); margin-top: 10px;">
-                        SIMULAR PAGAMENTO FEITO
-                    </button>
+                    <img src="${qrUrl}" class="qr-image" alt="QR Code">
+                    <button onclick="simularPagamentoPix()" style="background-color: var(--neon-mint); border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; color: var(--tech-purple); margin-top: 5px; font-size: 0.8rem;">SIMULAR PAGAMENTO</button>
                 </div>
             `;
         }
 
-        // Função auxiliar para o botão do PIX
         window.simularPagamentoPix = function() {
             const container = document.getElementById('dynamicContent');
-            container.innerHTML = `<div class="spinner"></div><p>Validando pagamento...</p>`;
-            setTimeout(() => {
-                showSuccess(container);
-            }, 2000);
+            container.innerHTML = `<div class="spinner"></div><p>Validando...</p>`;
+            setTimeout(() => showSuccess(container), 2000);
         }
 
-        // TELA 3: Sucesso (Comum a todos)
         function showSuccess(container) {
             container.innerHTML = `
                 <div class="success-screen" style="display: flex;">
                     <span class="material-icons success-icon">check_circle</span>
-                    <div class="instruction-title" style="color: var(--neon-mint);">Pagamento Aprovado!</div>
-                    <p class="instruction-text">
-                        Sua compra foi confirmada.<br>
-                        Aguarde a liberação dos produtos na bandeja inferior.
-                    </p>
-                    <p style="font-size: 0.9rem; margin-top: 20px;">Redirecionando em 5 segundos...</p>
+                    <div class="instruction-title" style="color: var(--neon-mint);">Aprovado!</div>
+                    <p class="instruction-text">Liberando produtos...</p>
                 </div>
             `;
 
-            // CORREÇÃO CRUCIAL:
-            // 1. Não limpamos o sessionStorage aqui (para a maquina.html poder ler).
-            // 2. Redirecionamos para maquina.html
+            // Envia sinal para o Simulador
+            window.parent.postMessage({ action: 'DISPENSAR_PRODUTOS', carrinho: carrinho }, '*');
+
             setTimeout(() => {
-                window.location.href = 'maquina.html';
+                sessionStorage.removeItem('carrinhoFarmaFacil'); 
+                window.location.href = 'loja.html';
             }, 5000);
         }
-
     </script>
-
 </body>
 </html>
