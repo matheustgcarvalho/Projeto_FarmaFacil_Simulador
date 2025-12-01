@@ -6,7 +6,7 @@
     <title>FarmaFácil - Loja</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-       :root { --tech-purple: #2E1A47; --neon-mint: #69FFC2; --pure-white: #FFFFFF; --warning-red: #ff4757; }
+       :root { --tech-purple: #2E1A47; --neon-mint: #69FFC2; --pure-white: #FFFFFF; --warning-red: #ff4757; --alert-orange: #ff9800; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
         
         body { 
@@ -111,13 +111,46 @@
         footer { background-color: rgba(46, 26, 71, 0.98); padding: 8px 15px; border-top: 1px solid rgba(105, 255, 194, 0.3); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .cart-summary-text { font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 5px; }
         .btn-checkout { background-color: var(--pure-white); color: var(--tech-purple); padding: 6px 15px; border-radius: 15px; font-weight: 800; border: none; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px; text-decoration: none;}
+
+        /* --- ESTILOS DO MODAL DE AVISO (NOVO) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(3px);
+            z-index: 1000;
+            display: none; /* Escondido por padrão */
+            justify-content: center; align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #2a1b3d;
+            border: 1px solid var(--neon-mint);
+            border-radius: 15px;
+            padding: 25px;
+            width: 85%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            animation: modalPop 0.3s ease-out;
+        }
+        @keyframes modalPop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .modal-icon { font-size: 3.5rem; color: var(--alert-orange); margin-bottom: 15px; }
+        .modal-title { font-size: 1.3rem; font-weight: 800; color: white; margin-bottom: 10px; }
+        .modal-text { font-size: 1rem; color: rgba(255,255,255,0.7); margin-bottom: 25px; line-height: 1.4; }
+        
+        .modal-actions { display: flex; gap: 15px; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; font-size: 1rem;}
+        .btn-modal-cancel { background-color: rgba(255,255,255,0.1); color: white; }
+        .btn-modal-confirm { background-color: var(--alert-orange); color: white; }
+
     </style>
 </head>
 <body>
 
     <header>
         <div class="header-left-group">
-            <div class="brand-logo"><span class="material-icons">local_pharmacy</span> Farma</div>
+            <div class="brand-logo"><span class="material-icons">local_pharmacy</span> FarmaFácil</div>
             <div class="user-greeting">Olá, <span id="userNameDisplay">Visitante</span></div>
         </div>
         <div class="header-actions">
@@ -200,7 +233,7 @@
                     <div class="product-img-container"><img src="https://placehold.co/100x100/EEE/2E1A47?text=Paracetamol" class="product-img"></div>
                     <h3 class="product-title">Paracetamol</h3>
                     <p class="product-subtitle">750mg - 20cp</p>
-                    <div class="product-footer"><span class="product-price">R$ 8,50</span><button class="btn-add" data-id="5" data-nome="Paracetamol" data-preco="8.50" data-imagem="https://placehold.co/100x100/EEE/2E1A47?text=Paracetamol" data-rx="false">+</button></div>
+                    <div class="product-footer"><span class="product-price">R$ 8,50</span><button class="btn-add" data-id="5" data-nome="Paracetamol 750mg" data-preco="8.50" data-imagem="https://placehold.co/100x100/EEE/2E1A47?text=Paracetamol" data-rx="false">+</button></div>
                 </div>
                 <div class="product-card" data-category="dor">
                     <span class="reg-tag tag-otc">Livre</span>
@@ -344,6 +377,22 @@
         <a href="carrinho.html" class="btn-checkout">CARRINHO <span class="material-icons" style="font-size:0.9rem;">arrow_forward</span></a>
     </footer>
 
+    <div id="qtyWarningModal" class="modal-overlay">
+        <div class="modal-content modal-warning">
+            <div class="material-icons modal-icon">health_and_safety</div>
+            <div class="modal-title">Atenção à Saúde</div>
+            <div class="modal-text">
+                Importante: O uso excessivo de qualquer medicamento sem a prescrição de um profissional pode causar prejuízos à sua saúde.
+                <br><br>
+                <strong>Deseja continuar comprando mais de 3 unidades desse medicamento?</strong>
+            </div>
+            <div class="modal-actions">
+                <button id="btnCancelQty" class="modal-btn btn-modal-cancel">Não</button>
+                <button id="btnConfirmQty" class="modal-btn btn-modal-confirm">Sim, desejo</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const nomeSalvo = sessionStorage.getItem('usuarioFarmaFacil');
@@ -359,7 +408,31 @@
             let carrinho = JSON.parse(sessionStorage.getItem('carrinhoFarmaFacil')) || [];
             atualizarContadoresCarrinho();
 
-            // Lógica de Filtro
+            // Lógica do Modal
+            const qtyWarningModal = document.getElementById('qtyWarningModal');
+            const btnCancelQty = document.getElementById('btnCancelQty');
+            const btnConfirmQty = document.getElementById('btnConfirmQty');
+            let pendingProduct = null; // Guarda o objeto produto completo
+
+            btnCancelQty.addEventListener('click', () => {
+                qtyWarningModal.style.display = 'none';
+                pendingProduct = null;
+            });
+
+            btnConfirmQty.addEventListener('click', () => {
+                if(pendingProduct) {
+                    carrinho.push(pendingProduct);
+                    sessionStorage.setItem('carrinhoFarmaFacil', JSON.stringify(carrinho));
+                    atualizarContadoresCarrinho();
+                    
+                    // Feedback visual (não temos referência ao botão original aqui facilmente, então pulamos o check visual)
+                }
+                qtyWarningModal.style.display = 'none';
+                pendingProduct = null;
+            });
+
+
+            // Filtros de Categoria
             const categoryItems = document.querySelectorAll('.category-item');
             const productCards = document.querySelectorAll('.product-card');
             const sectionTitle = document.getElementById('sectionTitle');
@@ -379,7 +452,7 @@
                 });
             });
 
-            // Lógica de Busca
+            // Busca
             document.querySelector('.search-input').addEventListener('input', function() {
                 const term = this.value.toLowerCase().trim();
                 productCards.forEach(card => {
@@ -389,26 +462,37 @@
                 });
             });
 
-            // Adicionar ao Carrinho
+            // Adicionar ao Carrinho (COM TRAVA)
             document.querySelectorAll('.btn-add').forEach(button => {
                 button.addEventListener('click', function() {
                     const isRx = this.getAttribute('data-rx') === 'true';
                     if (isRx) {
                         alert("⚠️ Requer Receita!\nChame o farmacêutico.");
                     } else {
+                        const id = this.getAttribute('data-id');
+                        
+                        // Conta quantos já existem no carrinho
+                        const qtdAtual = carrinho.filter(item => item.id === id).length;
+
                         const produto = {
-                            id: this.getAttribute('data-id'),
+                            id: id,
                             nome: this.getAttribute('data-nome'),
                             preco: parseFloat(this.getAttribute('data-preco')),
                             imagem: this.getAttribute('data-imagem')
                         };
-                        carrinho.push(produto);
-                        sessionStorage.setItem('carrinhoFarmaFacil', JSON.stringify(carrinho));
-                        atualizarContadoresCarrinho();
-                        
-                        const originalHtml = this.innerHTML;
-                        this.innerHTML = '✓';
-                        setTimeout(() => { this.innerHTML = originalHtml; }, 500);
+
+                        if (qtdAtual >= 3) {
+                            pendingProduct = produto;
+                            qtyWarningModal.style.display = 'flex';
+                        } else {
+                            carrinho.push(produto);
+                            sessionStorage.setItem('carrinhoFarmaFacil', JSON.stringify(carrinho));
+                            atualizarContadoresCarrinho();
+                            
+                            const originalHtml = this.innerHTML;
+                            this.innerHTML = '✓';
+                            setTimeout(() => { this.innerHTML = originalHtml; }, 500);
+                        }
                     }
                 });
             });

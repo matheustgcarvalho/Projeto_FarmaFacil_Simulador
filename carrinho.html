@@ -6,7 +6,7 @@
     <title>FarmaFácil - Carrinho</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-       :root { --tech-purple: #2E1A47; --neon-mint: #69FFC2; --pure-white: #FFFFFF; --warning-red: #ff4757; }
+       :root { --tech-purple: #2E1A47; --neon-mint: #69FFC2; --pure-white: #FFFFFF; --warning-red: #ff4757; --alert-orange: #ff9800; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
         
         /* Fonte base reduzida para caber no tablet */
@@ -99,7 +99,7 @@
             font-size: 1rem; cursor: pointer; display: flex; justify-content: center; alignItems: center; gap: 8px;
         }
 
-        /* --- ESTILOS DO MODAL DE CONFIRMAÇÃO --- */
+        /* --- ESTILOS DOS MODAIS --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.85);
@@ -113,23 +113,31 @@
             background-color: #2a1b3d;
             border: 1px solid var(--neon-mint);
             border-radius: 15px;
-            padding: 20px;
+            padding: 25px;
             width: 85%;
-            max-width: 300px;
+            max-width: 350px;
             text-align: center;
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
             animation: modalPop 0.3s ease-out;
         }
         @keyframes modalPop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-        .modal-icon { font-size: 3rem; color: var(--warning-red); margin-bottom: 10px; }
-        .modal-title { font-size: 1.1rem; font-weight: 800; color: white; margin-bottom: 5px; }
-        .modal-text { font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 20px; }
+        .modal-icon { font-size: 3.5rem; margin-bottom: 15px; }
+        .modal-title { font-size: 1.3rem; font-weight: 800; color: white; margin-bottom: 10px; }
+        .modal-text { font-size: 1rem; color: rgba(255,255,255,0.7); margin-bottom: 25px; line-height: 1.4; }
         
-        .modal-actions { display: flex; gap: 10px; }
-        .modal-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; font-size: 0.9rem;}
+        .modal-actions { display: flex; gap: 15px; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; font-size: 1rem;}
         .btn-modal-cancel { background-color: rgba(255,255,255,0.1); color: white; }
-        .btn-modal-confirm { background-color: var(--warning-red); color: white; }
+        
+        /* ESTILOS ESPECÍFICOS PARA CADA TIPO DE MODAL */
+        /* Modal de Perigo (Esvaziar) */
+        .modal-danger .modal-icon { color: var(--warning-red); }
+        .modal-danger .btn-modal-confirm { background-color: var(--warning-red); color: white; }
+        
+        /* Modal de Aviso (Quantidade) */
+        .modal-warning .modal-icon { color: var(--alert-orange); }
+        .modal-warning .btn-modal-confirm { background-color: var(--alert-orange); color: white; }
 
     </style>
 </head>
@@ -162,7 +170,7 @@
 
     <footer>
         <div class="cart-total-summary">
-            <span>Total:</span>
+            <span>Total a pagar:</span>
             <span id="totalValueDisplay" class="total-value">R$ 0,00</span>
         </div>
         <button class="btn-finish-order">
@@ -171,13 +179,29 @@
     </footer>
 
     <div id="confirmModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="material-icons modal-icon">warning_amber</div>
+        <div class="modal-content modal-danger">
+            <div class="material-icons modal-icon">delete_forever</div>
             <div class="modal-title">Esvaziar Carrinho?</div>
-            <div class="modal-text">Todos os itens serão removidos. Essa ação não pode ser desfeita.</div>
+            <div class="modal-text">Tem certeza que deseja remover todos os itens? Essa ação não pode ser desfeita.</div>
             <div class="modal-actions">
                 <button id="btnCancelClear" class="modal-btn btn-modal-cancel">Cancelar</button>
                 <button id="btnConfirmClear" class="modal-btn btn-modal-confirm">Sim, Esvaziar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="qtyWarningModal" class="modal-overlay">
+        <div class="modal-content modal-warning">
+            <div class="material-icons modal-icon">health_and_safety</div>
+            <div class="modal-title">Atenção à Saúde</div>
+            <div class="modal-text">
+                Importante: O uso excessivo de qualquer medicamento sem a prescrição de um profissional pode causar prejuízos à sua saúde.
+                <br><br>
+                <strong>Deseja continuar comprando mais de 3 unidades desse medicamento?</strong>
+            </div>
+            <div class="modal-actions">
+                <button id="btnCancelQty" class="modal-btn btn-modal-cancel">Não</button>
+                <button id="btnConfirmQty" class="modal-btn btn-modal-confirm">Sim, desejo</button>
             </div>
         </div>
     </div>
@@ -200,36 +224,53 @@
             const totalValueDisplay = document.getElementById('totalValueDisplay');
             const btnClearCart = document.getElementById('btnClearCart');
             
-            // Elementos do Modal
+            // Elementos dos Modais
             const confirmModal = document.getElementById('confirmModal');
             const btnCancelClear = document.getElementById('btnCancelClear');
             const btnConfirmClear = document.getElementById('btnConfirmClear');
 
-            // --- LÓGICA DO MODAL ---
-            // 1. Abrir Modal
+            const qtyWarningModal = document.getElementById('qtyWarningModal');
+            const btnCancelQty = document.getElementById('btnCancelQty');
+            const btnConfirmQty = document.getElementById('btnConfirmQty');
+
+            // Variável para guardar qual item está pendente de adição (regra > 3)
+            let pendingItemId = null;
+
+            // --- LÓGICA DO MODAL LIMPAR ---
             btnClearCart.addEventListener('click', function() {
-                if(carrinhoBruto.length > 0) {
-                    confirmModal.style.display = 'flex';
-                }
+                if(carrinhoBruto.length > 0) confirmModal.style.display = 'flex';
             });
-
-            // 2. Fechar Modal (Cancelar)
-            btnCancelClear.addEventListener('click', function() {
-                confirmModal.style.display = 'none';
-            });
-
-            // 3. Confirmar Limpeza
-            btnConfirmClear.addEventListener('click', function() {
+            btnCancelClear.addEventListener('click', () => confirmModal.style.display = 'none');
+            btnConfirmClear.addEventListener('click', () => {
                 carrinhoBruto = [];
                 salvarERenderizar();
                 confirmModal.style.display = 'none';
             });
 
-            // Lógica do Botão FINALIZAR
+            // --- LÓGICA DO MODAL DE QUANTIDADE ---
+            btnCancelQty.addEventListener('click', () => {
+                qtyWarningModal.style.display = 'none';
+                pendingItemId = null; // Cancela
+            });
+
+            btnConfirmQty.addEventListener('click', () => {
+                // Usuário confirmou, adiciona o item pendente
+                if(pendingItemId) {
+                    const itemToAdd = carrinhoBruto.find(item => item.id === pendingItemId);
+                    if(itemToAdd) {
+                        carrinhoBruto.push(itemToAdd);
+                        salvarERenderizar();
+                    }
+                }
+                qtyWarningModal.style.display = 'none';
+                pendingItemId = null;
+            });
+
+            // Finalizar Pagamento
             const btnFinish = document.querySelector('.btn-finish-order');
             btnFinish.addEventListener('click', function() {
                 if (carrinhoBruto.length === 0) {
-                    alert("Carrinho vazio!");
+                    alert("Seu carrinho está vazio!");
                     return;
                 }
                 window.location.href = 'metodopagamento.html';
@@ -256,8 +297,9 @@
                 cartListContainer.innerHTML = ''; 
                 let totalGeral = 0;
 
+                // Visibilidade do botão limpar
                 if (carrinhoBruto.length === 0) {
-                    btnClearCart.style.display = 'none';
+                    btnClearCart.style.display = 'none'; 
                     cartListContainer.innerHTML = '<div class="empty-cart-message"><span class="material-icons" style="font-size: 3rem; margin-bottom: 10px; display: block;">remove_shopping_cart</span>Vazio</div>';
                     totalValueDisplay.textContent = 'R$ 0,00';
                     return;
@@ -280,7 +322,7 @@
                             <div>
                                 <div class="item-name">${produto.nome}</div>
                                 <div class="item-price-unit">Unit: R$ ${produto.preco.toFixed(2).replace('.',',')}</div>
-                                <div class="item-price-total">R$ ${precoTotalItem.toFixed(2).replace('.',',')}</div>
+                                <div class="item-price-total">Total: R$ ${precoTotalItem.toFixed(2).replace('.',',')}</div>
                             </div>
                         </div>
 
@@ -288,7 +330,9 @@
                             <button class="btn-qty btn-decrease" data-id="${produto.id}">
                                 <span class="material-icons" style="font-size: 1rem;">remove</span>
                             </button>
+                            
                             <span class="qty-display">${produto.quantidade}</span>
+                            
                             <button class="btn-qty btn-increase" data-id="${produto.id}">
                                 <span class="material-icons" style="font-size: 1rem;">add</span>
                             </button>
@@ -302,6 +346,7 @@
             }
 
             function atribuirBotoes() {
+                // Diminuir
                 document.querySelectorAll('.btn-decrease').forEach(button => {
                     button.addEventListener('click', function() {
                         const id = this.getAttribute('data-id');
@@ -313,13 +358,25 @@
                     });
                 });
 
+                // Aumentar (COM REGRA DE TRAVA)
                 document.querySelectorAll('.btn-increase').forEach(button => {
                     button.addEventListener('click', function() {
                         const id = this.getAttribute('data-id');
-                        const itemExemplo = carrinhoBruto.find(item => item.id === id);
-                        if (itemExemplo) {
-                            carrinhoBruto.push(itemExemplo);
-                            salvarERenderizar();
+                        
+                        // 1. Conta quantos já tem
+                        const qtdAtual = carrinhoBruto.filter(item => item.id === id).length;
+
+                        // 2. Verifica se passou de 3
+                        if (qtdAtual >= 3) {
+                            pendingItemId = id; // Guarda para usar no modal
+                            qtyWarningModal.style.display = 'flex'; // Abre o aviso
+                        } else {
+                            // Se tem menos de 3, adiciona direto
+                            const itemExemplo = carrinhoBruto.find(item => item.id === id);
+                            if (itemExemplo) {
+                                carrinhoBruto.push(itemExemplo);
+                                salvarERenderizar();
+                            }
                         }
                     });
                 });
